@@ -4,17 +4,28 @@ import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.MotionEventCompat
+import com.example.screencaptureapp.databinding.ActivityMainBinding
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityMainBinding
+    private var isPushed = false
+
+
     companion object {
+
         private fun takeScreenShot(view: View): Bitmap =
-                Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888).apply { view.draw(Canvas(this)) }
+            Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+                .apply { view.draw(Canvas(this)) }
 
         private fun takeScreenShotOfRootView(v: View): Bitmap = takeScreenShot(v.rootView)
 
@@ -29,7 +40,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             val collection =
-                    MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
 
             context.contentResolver.insert(collection, values)?.let { imageUri ->
                 context.contentResolver.openOutputStream(imageUri).use { outputStream ->
@@ -46,15 +57,49 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+
+
+        binding.screenShotButton.setOnClickListener {
+
+            val bitmap = takeScreenShotOfRootView(binding.imageView2)
+            binding.imageView3.apply {
+                setImageBitmap(bitmap)
+                visibility = View.VISIBLE
+            }
+
+            view.setBackgroundColor(Color.parseColor("#999999"))
+
+            saveScreenShot(this, bitmap)
+
+            isPushed = true
+        }
 
     }
 
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
 
+        if (event != null) {
+            if (event.action == MotionEvent.ACTION_DOWN) {
 
+                if (isPushed) {
+                    binding.root.setBackgroundColor(Color.parseColor("#ffffff"))
+                    binding.imageView3.visibility = View.INVISIBLE
+                    isPushed = false
+                }
+
+            }
+
+        }
+
+        return false
+    }
 
 
 }
