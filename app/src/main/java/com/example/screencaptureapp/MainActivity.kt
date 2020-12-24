@@ -7,7 +7,9 @@ import android.graphics.Canvas
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
@@ -39,8 +41,9 @@ class MainActivity : AppCompatActivity() {
                 put(MediaStore.Images.Media.IS_PENDING, 1)
             }
 
-            val collection =
-                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            val collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
+            Log.d("mainActivity.kt", Environment.getExternalStorageState())
 
             context.contentResolver.insert(collection, values)?.let { imageUri ->
                 context.contentResolver.openOutputStream(imageUri).use { outputStream ->
